@@ -1,7 +1,6 @@
 package tech.buildrun.saidera.entity;
 
 import jakarta.persistence.*;
-import org.antlr.v4.runtime.misc.NotNull;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -34,6 +33,19 @@ public class Item {
 
     @ManyToMany(mappedBy = "consumedItems")
     private List<People> consumers;
+
+
+    public Item() {
+        this.consumers = new ArrayList<>();
+    }
+
+    public Item(String name, BigDecimal price, Integer quantity, Bill bill) {
+        this();
+        this.name = name;
+        this.price = price;
+        this.quantity = quantity;
+        this.bill = bill;
+    }
 
     // Getters and Setters
     public Long getId() {

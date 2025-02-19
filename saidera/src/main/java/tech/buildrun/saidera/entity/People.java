@@ -31,6 +31,17 @@ public class People {
     )
     private List<Item> consumedItems;
 
+
+    public People() {
+        this.consumedItems = new ArrayList<>();
+    }
+
+    public People(String name, Bill bill) {
+        this();
+        this.name = name;
+        this.bill = bill;
+    }
+
     // Getters and Setters
     public Long getId() {
         return id;

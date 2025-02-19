@@ -35,6 +35,18 @@ public class Bill {
     @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Item> items = new ArrayList<>();
 
+
+    public Bill() {
+        this.people = new ArrayList<>();
+        this.items = new ArrayList<>();
+    }
+
+    public Bill(String creatorName) {
+        this();
+        this.creatorName = creatorName;
+    }
+
+
     // Getters and Setters
     public Long getId() {
         return id;
