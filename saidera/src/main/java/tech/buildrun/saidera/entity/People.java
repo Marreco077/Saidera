@@ -1,5 +1,6 @@
 package tech.buildrun.saidera.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -19,10 +20,13 @@ public class People {
     @Column(name = "hasPaid")
     private boolean hasPaid = Boolean.FALSE;
 
+    // Na classe People
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bill_id", nullable = false)
     private Bill bill;
 
+    @JsonIgnore
     @ManyToMany
     @JoinTable(
             name = "consumption",

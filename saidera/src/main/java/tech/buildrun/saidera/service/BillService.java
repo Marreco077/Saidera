@@ -5,6 +5,9 @@ import tech.buildrun.saidera.controller.CreateBillDto;
 import tech.buildrun.saidera.entity.Bill;
 import tech.buildrun.saidera.repository.BillRepository;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class BillService {
 
@@ -32,8 +35,19 @@ public class BillService {
         return billRepository.save(bill);
     }
 
-    public Bill getBillById(String billId) {
-        return billRepository.findByUniqueId(billId)
-                .orElseThrow(() -> new RuntimeException("Bill not found with id: " + billId));
+    public Optional<Bill> getBillById(String billId) {
+
+        return billRepository.findById(Long.parseLong(billId));
+    }
+
+    public List<Bill> listBills() {
+        return billRepository.findAll();
+    }
+
+    public void deleteById(String billId) {
+        var billExists = billRepository.existsById(Long.parseLong(billId));
+        if (billExists) {
+            billRepository.deleteById(Long.parseLong(billId));
+        }
     }
 }

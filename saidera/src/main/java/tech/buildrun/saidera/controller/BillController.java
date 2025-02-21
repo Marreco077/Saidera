@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.*;
 import tech.buildrun.saidera.entity.Bill;
 import tech.buildrun.saidera.service.BillService;
 
+import java.util.List;
+
+
 @RestController
 @RequestMapping("/bills")
 public class BillController {
@@ -25,7 +28,25 @@ public class BillController {
 
     @GetMapping("/{billId}")
     public ResponseEntity<Bill> getBillById(@PathVariable("billId") String billId) {
-        Bill bill = billService.getBillById(billId);
-        return ResponseEntity.ok(bill);
+        var user =billService.getBillById(billId);
+        if (user.isPresent()) {
+            return ResponseEntity.ok(user.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Bill>> listBills() {
+        var bills = billService.listBills();
+
+        return ResponseEntity.ok(bills);
+    }
+
+
+    @DeleteMapping("/{billId}")
+    public ResponseEntity<Void> deleteById(@PathVariable("billId") String billId) {
+        billService.deleteById(billId);
+        return ResponseEntity.noContent().build();
     }
 }
