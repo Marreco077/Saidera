@@ -1,5 +1,6 @@
 package tech.buildrun.saidera.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -15,9 +16,6 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "unique_id", nullable = false)
-    private String uniqueId = UUID.randomUUID().toString();
-
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
@@ -27,10 +25,12 @@ public class Item {
     @Column(name = "quantity", nullable = false)
     private Integer quantity = 1;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bill_id", nullable = false)
     private Bill bill;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "consumedItems")
     private List<People> consumers;
 
@@ -56,13 +56,6 @@ public class Item {
         this.id = id;
     }
 
-    public String getUniqueId() {
-        return uniqueId;
-    }
-
-    public void setUniqueId(String uniqueId) {
-        this.uniqueId = uniqueId;
-    }
 
     public String getName() {
         return name;
