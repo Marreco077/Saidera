@@ -91,7 +91,6 @@ public class People {
         this.consumedItems = consumedItems;
     }
 
-    // Helper methods to manage bidirectional relationships
     public void addConsumedItem(Item item) {
         if (consumedItems == null) {
             consumedItems = new ArrayList<>();

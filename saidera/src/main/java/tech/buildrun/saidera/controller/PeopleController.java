@@ -43,13 +43,12 @@ public class PeopleController {
         return ResponseEntity.noContent().build();
     }
 
-
+    // Atualizado para zerar o valor ao marcar como pago
     @PatchMapping("/{peopleId}/pay")
     public ResponseEntity<People> payPerson(@PathVariable Long peopleId) {
-        People updated = peopleService.payPerson(peopleId);
+        People updated = peopleService.payPerson(peopleId);  // Alteramos o método aqui
         return ResponseEntity.ok(updated);
     }
-
 
     @PatchMapping("/{peopleId}/amount")
     public ResponseEntity<People> updateAmountToPay(
@@ -57,5 +56,10 @@ public class PeopleController {
             @RequestParam BigDecimal newAmount) {
         People updated = peopleService.updateAmountToPay(peopleId, newAmount);
         return ResponseEntity.ok(updated);
+    }
+
+    @GetMapping("/{billId}/pending-amount")
+    public ResponseEntity<BigDecimal> getPendingAmount(@PathVariable Long billId) {
+        return ResponseEntity.ok(peopleService.getPendingAmount(billId));
     }
 }

@@ -3,16 +3,15 @@ package tech.buildrun.saidera.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.buildrun.saidera.controller.CreatePeopleDto;
-import tech.buildrun.saidera.entity.People;
 import tech.buildrun.saidera.entity.Bill;
-import tech.buildrun.saidera.repository.PeopleRepository;
+import tech.buildrun.saidera.entity.People;
 import tech.buildrun.saidera.repository.BillRepository;
+import tech.buildrun.saidera.repository.PeopleRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-
-import java.math.BigDecimal;
 
 @Service
 public class PeopleService {
@@ -52,7 +51,7 @@ public class PeopleService {
                 .orElseThrow(() -> new EntityNotFoundException("Person not found"));
 
         Bill bill = people.getBill();
-        bill.removePerson(people);
+        bill.removePerson(people); // Remove da lista do Bill (se houver essa lógica)
         peopleRepository.delete(people);
     }
 
@@ -61,13 +60,22 @@ public class PeopleService {
         People people = peopleRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Person not found"));
 
-        if (people.isHasPaid()) {
-            people.setHasPaid(false);
-            people.setAmountToPay(BigDecimal.ZERO); // Zera a dívida
-        } else {
-            people.setHasPaid(true);
+        boolean isPaid = !people.isHasPaid();
+        people.setHasPaid(isPaid);
+
+        if (isPaid) {
+            people.setAmountToPay(BigDecimal.ZERO);
         }
 
+        return peopleRepository.save(people);
+    }
+
+    @Transactional
+    public People updateAmountToPay(Long peopleId, BigDecimal newAmount) {
+        People people = peopleRepository.findById(peopleId)
+                .orElseThrow(() -> new EntityNotFoundException("Person not found"));
+
+        people.updateAmountToPay(newAmount);
         return peopleRepository.save(people);
     }
 
@@ -77,19 +85,15 @@ public class PeopleService {
                 .orElseThrow(() -> new EntityNotFoundException("Person not found"));
 
         person.setHasPaid(true);
-
         person.setAmountToPay(BigDecimal.ZERO);
 
         return peopleRepository.save(person);
     }
 
 
-    @Transactional
-    public People updateAmountToPay(Long peopleId, BigDecimal newAmount) {
-        People people = peopleRepository.findById(peopleId)
-                .orElseThrow(() -> new EntityNotFoundException("Person not found"));
-
-        people.updateAmountToPay(newAmount);
-        return peopleRepository.save(people);
+    public BigDecimal getPendingAmount(Long billId) {
+        Bill bill = billRepository.findById(billId)
+                .orElseThrow(() -> new EntityNotFoundException("Bill not found"));
+        return bill.getTotalPendingAmount();
     }
 }

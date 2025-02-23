@@ -4,79 +4,36 @@
     <meta charset="UTF-8">
     <title>Saidera - Conta</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Ajuste o caminho do seu CSS real, se tiver -->
     <link th:href="@{/css/bill.css}" rel="stylesheet">
 </head>
 <body>
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Saidera - Conta</h1>
-        <span class="badge"
-              th:classappend="${bill.isActive} ? 'bg-success' : 'bg-danger'"
-              th:text="${bill.isActive} ? 'Ativa' : 'Fechada'">
-            Status
-        </span>
+        <span class="badge" th:classappend="${bill.isActive} ? 'bg-success' : 'bg-danger'" th:text="${bill.isActive} ? 'Ativa' : 'Fechada'">Status</span>
     </div>
 
-    <!-- Informações da Conta -->
     <div class="card mb-4">
         <div class="card-body">
-            <h6>
-                Criada por:
-                <span th:text="${bill.creatorName}">Nome do Criador</span>
-            </h6>
-            <p class="text-muted mb-0">
-                UniqueId (URL):
-                <span th:text="${bill.uniqueId}">UUID</span>
-            </p>
-            <p class="text-muted mb-0">
-                ID Numérico:
-                <span th:text="${bill.id}">1</span>
-            </p>
-            <small class="text-muted">
-                Criada em:
-                <span th:text="${#temporals.format(bill.creationTime, 'dd/MM/yyyy HH:mm')}">Data</span>
-            </small>
+            <h6>Criada por: <span th:text="${bill.creatorName}">Nome do Criador</span></h6>
+            <p class="text-muted mb-0">UniqueId (URL): <span th:text="${bill.uniqueId}">UUID</span></p>
+            <p class="text-muted mb-0">ID Numérico: <span th:text="${bill.id}">1</span></p>
+            <small class="text-muted">Criada em: <span th:text="${#temporals.format(bill.creationTime, 'dd/MM/yyyy HH:mm')}">Data</span></small>
         </div>
     </div>
 
-    <!-- Seção de Pessoas -->
     <div class="card mb-4">
         <div class="card-body">
             <h5 class="card-title">Pessoas na Conta</h5>
             <div class="people-list mb-3" id="peopleContainer">
-                <!-- Lista inicial de pessoas (renderizada pelo Thymeleaf) -->
-                <div th:each="person : ${bill.people}"
-                     th:id="'person-wrapper-' + ${person.id}"
-                     class="d-flex align-items-center mb-2">
-
-                    <!-- Checkbox: marca pagamento -->
-                    <input type="checkbox"
-                           class="form-check-input me-2"
-                           th:id="'person-' + ${person.id}"
-                           th:checked="${person.hasPaid}"
-                           th:onclick="'togglePaymentStatus(' + ${person.id} + ')'"/>
-
-                    <!-- Nome da pessoa -->
-                    <label class="form-check-label flex-grow-1"
-                           th:for="'person-' + ${person.id}"
-                           th:text="${person.name}">
-                        Nome da Pessoa
-                    </label>
-
-                    <span class="me-3" th:text="'R$ ' + ${#numbers.formatDecimal(person.amountToPay, 1, 2)}">
-                            R$ 0,00
-                    </span>
-
-                    <!-- Botão Remover -->
-                    <button class="btn btn-danger btn-sm ms-2"
-                            th:onclick="'removePerson(' + ${person.id} + ')'">
-                        Remover
-                    </button>
+                <div th:each="person : ${bill.people}" th:id="'person-wrapper-' + ${person.id}" class="d-flex align-items-center mb-2">
+                    <input type="checkbox" class="form-check-input me-2" th:id="'person-' + ${person.id}" th:checked="${person.hasPaid}" th:onclick="'togglePaymentStatus(' + ${person.id} + ')'"/>
+                    <label class="form-check-label flex-grow-1" th:for="'person-' + ${person.id}" th:text="${person.name}">Nome da Pessoa</label>
+                    <span class="me-3" th:text="'R$ ' + ${#numbers.formatDecimal(person.amountToPay, 1, 2)}">R$ 0,00</span>
+                    <button class="btn btn-success btn-sm me-2" th:onclick="'markPersonAsPaid(' + ${person.id} + ')'">Marcar como pago</button>
+                    <button class="btn btn-danger btn-sm ms-2" th:onclick="'removePerson(' + ${person.id} + ')'">Remover</button>
                 </div>
             </div>
-
-            <!-- Formulário para adicionar nova pessoa -->
             <div class="input-group">
                 <input type="text" id="newPersonName" class="form-control" placeholder="Nome da pessoa">
                 <button class="btn btn-primary" onclick="addPerson()">Adicionar Pessoa</button>
@@ -84,7 +41,6 @@
         </div>
     </div>
 
-    <!-- Seção de Itens -->
     <div class="card mb-4">
         <div class="card-body">
             <h5 class="mb-3">Adicionar Item</h5>
@@ -101,26 +57,16 @@
                 <div class="col-md-2">
                     <button class="btn btn-success w-100" onclick="addItem()">Confirmar</button>
                 </div>
-                <!-- Seleção de consumidores -->
                 <div class="col-md-12">
                     <label class="form-label">Quem consumiu este item?</label>
                     <div class="consumers-list">
                         <div th:each="person : ${bill.people}" class="form-check">
-                            <input type="checkbox"
-                                   class="form-check-input consumer-checkbox"
-                                   th:value="${person.id}"
-                                   th:id="'consumer-' + ${person.id}">
-                            <label class="form-check-label"
-                                   th:for="'consumer-' + ${person.id}"
-                                   th:text="${person.name}">
-                                Nome da Pessoa
-                            </label>
+                            <input type="checkbox" class="form-check-input consumer-checkbox" th:value="${person.id}" th:id="'consumer-' + ${person.id}">
+                            <label class="form-check-label" th:for="'consumer-' + ${person.id}" th:text="${person.name}">Nome da Pessoa</label>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Lista de Itens -->
             <div class="mt-4">
                 <h6>Itens Adicionados</h6>
                 <div class="list-group">
@@ -138,183 +84,209 @@
         </div>
     </div>
 
-    <!-- Seção de Totalização -->
     <div class="card mt-4">
         <div class="card-body">
             <h5 class="card-title">Total da Conta</h5>
-            <div id="totalContainer">
-                <!-- Valor calculado no Controller ou no back-end -->
-                <h3>R$
-                    <span th:text="${total != null ? #numbers.formatDecimal(total, 2, 2) : '0,00'}">
-                        0,00
-                    </span>
-                </h3>
-            </div>
+            <h3>R$ <span id="totalAmount" th:text="${total != null ? #numbers.formatDecimal(total, 2, 2) : '0,00'}">0,00</span></h3>
+            <h5 class="card-title mt-3 text-danger">Total Pendente</h5>
+            <h3 class="text-danger">R$ <span id="pendingAmount" th:text="${#numbers.formatDecimal(bill.totalPendingAmount, 2, 2)}">0,00</span></h3>
         </div>
     </div>
-</div>
 
-<!-- Scripts -->
-<script th:inline="javascript">
-    /*<![CDATA[*/
 
-    const billId = [[${bill.id}]];
-    const billUniqueId = [[${bill.uniqueId}]];
+    <script th:inline="javascript">
+        const billId = [[${bill.id}]];
+        const billUniqueId = [[${bill.uniqueId}]];
 
-    /**
-     * Adiciona uma nova pessoa à conta
-     */
-    async function addPerson() {
-        const input = document.getElementById('newPersonName');
-        const name = input.value.trim();
-        if (!name) return;
+        async function addPerson() {
+            const input = document.getElementById('newPersonName');
+            const name = input.value.trim();
+            if (!name) return;
 
-        try {
-            const response = await fetch(`/api/people/bills/${billId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name })
-            });
-            if (response.ok) {
-                const createdPerson = await response.json();
-                addPersonToList(createdPerson);
-                input.value = ''; // limpa o campo
-            } else {
-                console.error('Erro ao adicionar pessoa:', response.status);
+            try {
+                const response = await fetch(`/api/people/bills/${billId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                });
+                if (response.ok) {
+                    const createdPerson = await response.json();
+                    addPersonToList(createdPerson);
+                    input.value = '';
+                    updatePendingAmount(billId);
+                } else {
+                    console.error('Erro ao adicionar pessoa:', response.status);
+                }
+            } catch (error) {
+                console.error('Erro ao adicionar pessoa:', error);
             }
-        } catch (error) {
-            console.error('Erro ao adicionar pessoa:', error);
         }
-    }
 
-    /**
-     * Insere dinamicamente a nova pessoa na lista (DOM)
-     */
-    function addPersonToList(person) {
-        const container = document.getElementById('peopleContainer');
-        const div = document.createElement('div');
-        div.classList.add('d-flex', 'align-items-center', 'mb-2');
-        div.id = `person-wrapper-${person.id}`;
+        function updatePendingAmount(billId) {
+            fetch(`/api/people/${billId}/pending-amount`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("pendingAmount").textContent = `R$ ${data.toFixed(2)}`;
+                })
+                .catch(error => console.error("Erro ao buscar total pendente:", error));
+        }
 
-        // Monta o HTML
-        div.innerHTML = `
-            <input type="checkbox"
-                   class="form-check-input me-2"
-                   id="person-${person.id}"
-                   ${person.hasPaid ? 'checked' : ''}
-                   onclick="togglePaymentStatus(${person.id})" />
-            <label class="form-check-label flex-grow-1"
-                   for="person-${person.id}">
-                ${person.name}
-            </label>
-            <button class="btn btn-danger btn-sm ms-2"
-                    onclick="removePerson(${person.id})">
-                Remover
-            </button>
-        `;
 
-        container.appendChild(div);
-
-        // Adiciona também na lista de consumidores
-        const consumersList = document.querySelector('.consumers-list');
-        const consumerDiv = document.createElement('div');
-        consumerDiv.classList.add('form-check');
-        consumerDiv.innerHTML = `
-            <input type="checkbox"
-                   class="form-check-input consumer-checkbox"
-                   value="${person.id}"
-                   id="consumer-${person.id}">
-            <label class="form-check-label"
-                   for="consumer-${person.id}">
-                ${person.name}
-            </label>
-        `;
-        consumersList.appendChild(consumerDiv);
-    }
-
-    /**
-     * Toggla o status de pagamento (PATCH)
-     */
-    async function togglePaymentStatus(peopleId) {
-        try {
-            const response = await fetch(`/api/people/${peopleId}/payment`, {
-                method: 'PATCH'
+        function updateTotalOnPage() {
+            let total = 0;
+            document.querySelectorAll('.person-amount').forEach(span => {
+                const rawAmount = parseFloat(span.dataset.amount);
+                const personId = span.closest('.d-flex').id.split('-')[2];
+                const isPaid = document.querySelector(`#person-${personId}`).checked;
+                if (!isPaid && !isNaN(rawAmount)) {
+                    total += rawAmount;
+                }
             });
-            if (!response.ok) {
-                console.error('Falha ao atualizar status de pagamento:', response.status);
+            const totalSpan = document.querySelector('#totalContainer span');
+            if (totalSpan) {
+                totalSpan.textContent = total.toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                }).replace('R$', '');
             }
-        } catch (error) {
-            console.error('Erro ao atualizar status de pagamento:', error);
         }
-    }
 
-    /**
-     * Remove a pessoa (DELETE)
-     */
-    async function removePerson(peopleId) {
-        const confirma = confirm("Tem certeza que deseja remover esta pessoa?");
-        if (!confirma) return;
+        function addPersonToList(person) {
+            const container = document.getElementById('peopleContainer');
+            const div = document.createElement('div');
+            div.classList.add('d-flex', 'align-items-center', 'mb-2');
+            div.id = `person-wrapper-${person.id}`;
+            div.innerHTML = `
+            <input type="checkbox" class="form-check-input me-2" id="person-${person.id}" ${person.hasPaid ? 'checked' : ''} onclick="togglePaymentStatus(${person.id})" />
+            <label class="form-check-label flex-grow-1" for="person-${person.id}">${person.name}</label>
+            <button class="btn btn-danger btn-sm ms-2" onclick="removePerson(${person.id})">Remover</button>
+          `;
+            container.appendChild(div);
 
-        try {
-            const response = await fetch(`/api/people/${peopleId}`, {
-                method: 'DELETE'
-            });
-            if (response.ok) {
-                // Remove da lista de pessoas
+            const consumersList = document.querySelector('.consumers-list');
+            const consumerDiv = document.createElement('div');
+            consumerDiv.classList.add('form-check');
+            consumerDiv.innerHTML = `
+            <input type="checkbox" class="form-check-input consumer-checkbox" value="${person.id}" id="consumer-${person.id}">
+            <label class="form-check-label" for="consumer-${person.id}">${person.name}</label>
+          `;
+            consumersList.appendChild(consumerDiv);
+        }
+
+        function payPerson(personId) {
+            fetch(`/api/people/${personId}/pay`, {
+                method: 'PATCH',
+                headers: { "Content-Type": "application/json" }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Erro ao processar pagamento");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Pessoa paga:", data);
+                    const personElement = document.getElementById(`person-wrapper-${personId}`);
+                    const checkbox = document.getElementById(`person-${personId}`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        personElement.querySelector('label').classList.add('paid');
+                    }
+                    updateTotalOnPage();
+                })
+                .catch(error => console.error("Erro ao marcar pagamento:", error));
+        }
+
+        async function togglePaymentStatus(peopleId) {
+            try {
+                const response = await fetch(`/api/people/${peopleId}/payment`, { method: 'PATCH' });
+                if (!response.ok) {
+                    console.error('Falha ao atualizar status de pagamento:', response.status);
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar status de pagamento:', error);
+            }
+        }
+
+        async function markPersonAsPaid(peopleId) {
+            const confirma = confirm("Tem certeza que deseja marcar esta pessoa como paga?");
+            if (!confirma) return;
+
+            try {
+                const response = await fetch(`/api/people/${peopleId}/pay`, {
+                    method: 'PATCH',
+                    headers: { "Content-Type": "application/json" }
+                });
+                if (!response.ok) {
+                    throw new Error("Erro ao marcar pessoa como paga");
+                }
                 const personDiv = document.getElementById(`person-wrapper-${peopleId}`);
                 if (personDiv) {
-                    personDiv.remove();
+                    const checkbox = document.getElementById(`person-${peopleId}`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                    }
+                    const amountToPaySpan = personDiv.querySelector('span');
+                    if (amountToPaySpan) {
+                        amountToPaySpan.textContent = 'R$ 0,00';
+                    }
                 }
-                // Remove da lista de consumidores
-                const consumerCheckbox = document.getElementById(`consumer-${peopleId}`);
-                if (consumerCheckbox) {
-                    consumerCheckbox.closest('.form-check').remove();
+                updatePendingAmount(billId);
+            } catch (error) {
+                console.error('Erro ao marcar pessoa como paga:', error);
+            }
+        }
+
+
+        async function removePerson(peopleId) {
+            const confirma = confirm("Tem certeza que deseja remover esta pessoa?");
+            if (!confirma) return;
+            try {
+                const response = await fetch(`/api/people/${peopleId}`, { method: 'DELETE' });
+                if (response.ok) {
+                    const personDiv = document.getElementById(`person-wrapper-${peopleId}`);
+                    if (personDiv) personDiv.remove();
+                    const consumerCheckbox = document.getElementById(`consumer-${peopleId}`);
+                    if (consumerCheckbox) consumerCheckbox.closest('.form-check').remove();
+                    updatePendingAmount(billId);
+                } else {
+                    console.error('Falha ao remover pessoa:', response.status);
                 }
-            } else {
-                console.error('Falha ao remover pessoa:', response.status);
+            } catch (error) {
+                console.error('Erro ao remover pessoa:', error);
             }
-        } catch (error) {
-            console.error('Erro ao remover pessoa:', error);
         }
-    }
 
-    /**
-     * Adiciona um novo item
-     */
-    async function addItem() {
-        const name = document.getElementById('itemName').value;
-        const price = document.getElementById('itemPrice').value;
-        const quantity = document.getElementById('itemQuantity').value;
-
-        if (!name || !price || !quantity) return;
-
-        // Pega todos os checkboxes marcados
-        const selectedConsumers = Array.from(document.querySelectorAll('.consumer-checkbox:checked'))
-            .map(checkbox => parseInt(checkbox.value));
-
-        try {
-            const response = await fetch(`/bills/${billUniqueId}/items`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: name,
-                    price: parseFloat(price),
-                    quantity: parseInt(quantity),
-                    peopleIds: selectedConsumers
-                })
-            });
-            if (response.ok) {
-                window.location.reload();
-            } else {
-                console.error('Erro ao adicionar item:', response.status);
+        async function addItem() {
+            const name = document.getElementById('itemName').value;
+            const price = document.getElementById('itemPrice').value;
+            const quantity = document.getElementById('itemQuantity').value;
+            if (!name || !price || !quantity) return;
+            const selectedConsumers = Array.from(document.querySelectorAll('.consumer-checkbox:checked'))
+                .map(checkbox => parseInt(checkbox.value));
+            try {
+                const response = await fetch(`/bills/${billUniqueId}/items`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name,
+                        price: parseFloat(price),
+                        quantity: parseInt(quantity),
+                        peopleIds: selectedConsumers
+                    })
+                });
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    console.error('Erro ao adicionar item:', response.status);
+                }
+            } catch (error) {
+                console.error('Erro ao adicionar item:', error);
             }
-        } catch (error) {
-            console.error('Erro ao adicionar item:', error);
         }
-    }
-    /*]]>*/
-</script>
+    </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</div>
 </body>
 </html>

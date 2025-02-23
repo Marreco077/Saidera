@@ -1,6 +1,8 @@
 package tech.buildrun.saidera.entity;
 
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,8 +49,20 @@ public class Bill {
         this.uniqueId = UUID.randomUUID().toString();
     }
 
+    public BigDecimal calculateTotalAmount() {
+        return people.stream()
+                .map(People::getAmountToPay)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 
-    // Getters and Setters
+    public BigDecimal getTotalPendingAmount() {
+        return people.stream()
+                .filter(p -> !p.isHasPaid())
+                .map(People::getAmountToPay)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+
     public Long getId() {
         return id;
     }
