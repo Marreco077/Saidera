@@ -5,13 +5,14 @@ import tech.buildrun.saidera.controller.CreateBillDto;
 import tech.buildrun.saidera.entity.Bill;
 import tech.buildrun.saidera.repository.BillRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class BillService {
 
-    private BillRepository billRepository;
+    private final BillRepository billRepository;
 
     public BillService(BillRepository billRepository) {
         this.billRepository = billRepository;
@@ -32,22 +33,33 @@ public class BillService {
             bill.setIsActive(dto.isActive());
         }
 
-        return billRepository.save(bill);
+        Bill savedBill = billRepository.save(bill);
+
+        System.out.println("Bill criada com ID: " + savedBill.getId());
+
+        return savedBill;
     }
 
-    public Optional<Bill> getBillById(String billId) {
+    public Optional<Bill> getBillByUniqueId(String uniqueId) {
+        return billRepository.findByUniqueId(uniqueId);
+    }
 
-        return billRepository.findById(Long.parseLong(billId));
+    protected Optional<Bill> getBillByInternalId(Long id) {
+        return billRepository.findById(id);
     }
 
     public List<Bill> listBills() {
         return billRepository.findAll();
     }
 
-    public void deleteById(String billId) {
-        var billExists = billRepository.existsById(Long.parseLong(billId));
-        if (billExists) {
-            billRepository.deleteById(Long.parseLong(billId));
-        }
+    public void deleteByUniqueId(String uniqueId) {
+        billRepository.findByUniqueId(uniqueId)
+                .ifPresent(billRepository::delete);
+    }
+
+    public boolean isBillExpired(String uniqueId) {
+        return getBillByUniqueId(uniqueId)
+                .map(bill -> bill.getExpirationTime().isBefore(LocalDateTime.now()))
+                .orElse(true); // Se não encontrar, considera expirada
     }
 }

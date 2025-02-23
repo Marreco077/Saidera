@@ -47,6 +47,9 @@ public class Item {
         this.bill = bill;
     }
 
+    public Item(String name, Double price, Integer quantity, Bill bill) {
+    }
+
     // Getters and Setters
     public Long getId() {
         return id;

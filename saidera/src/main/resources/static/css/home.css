@@ -1,0 +1,75 @@
+/* Estilos globais para o corpo da página */
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0; /* Remove margens padrão */
+    font-family: Arial, sans-serif; /* Define uma fonte padrão */
+}
+
+/* Estilos para o card */
+.card {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 20px; /* Adiciona um espaçamento interno */
+    max-width: 400px; /* Define uma largura máxima para o card */
+    width: 100%; /* Garante que o card ocupe 100% da largura disponível */
+}
+
+/* Efeito de hover no card */
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Estilos para o texto do logo */
+.logo-text {
+    font-size: 3.5rem;
+    color: #2c3e50;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-align: center; /* Centraliza o texto */
+    margin-bottom: 20px; /* Adiciona margem inferior */
+}
+
+/* Estilos para os campos de formulário */
+.form-control {
+    border-radius: 10px;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s ease;
+    width: 100%; /* Garante que o campo ocupe 100% da largura */
+    margin-bottom: 15px; /* Adiciona margem inferior */
+}
+
+/* Efeito de foco nos campos de formulário */
+.form-control:focus {
+    border-color: #2c3e50;
+    box-shadow: 0 0 0 0.25rem rgba(44, 62, 80, 0.25);
+    outline: none; /* Remove o contorno padrão do navegador */
+}
+
+/* Estilos para o botão primário */
+.btn-primary {
+    background-color: #2c3e50;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    color: #fff; /* Define a cor do texto */
+    cursor: pointer; /* Muda o cursor para pointer */
+    width: 100%; /* Garante que o botão ocupe 100% da largura */
+}
+
+/* Efeito de hover no botão primário */
+.btn-primary:hover {
+    background-color: #34495e;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Adiciona uma sombra ao hover */
+}

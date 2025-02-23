@@ -3,6 +3,7 @@ package tech.buildrun.saidera.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +21,10 @@ public class People {
     @Column(name = "hasPaid")
     private boolean hasPaid = Boolean.FALSE;
 
-    // Na classe People
+    @Column(name = "amount_to_pay", precision = 10, scale = 2)
+    private BigDecimal amountToPay = BigDecimal.ZERO;
+
+
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bill_id", nullable = false)
@@ -107,6 +111,21 @@ public class People {
         }
         if (item.getConsumers() != null) {
             item.getConsumers().remove(this);
+        }
+    }
+
+    public BigDecimal getAmountToPay() {
+        return amountToPay;
+    }
+
+    public void setAmountToPay(BigDecimal amountToPay) {
+        this.amountToPay = amountToPay;
+    }
+
+    public void updateAmountToPay(BigDecimal amount) {
+        this.amountToPay = amount;
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            this.hasPaid = true;
         }
     }
 }

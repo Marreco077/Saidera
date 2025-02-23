@@ -15,7 +15,7 @@ public class Bill {
     private Long id;
 
     @Column(name = "unique_id", nullable = false, unique = true)
-    private String uniqueId = UUID.randomUUID().toString();
+    private String uniqueId;
 
     @Column(name = "creator_name", nullable = false, length = 50)
     private String creatorName;
@@ -44,6 +44,7 @@ public class Bill {
     public Bill(String creatorName) {
         this();
         this.creatorName = creatorName;
+        this.uniqueId = UUID.randomUUID().toString();
     }
 
 

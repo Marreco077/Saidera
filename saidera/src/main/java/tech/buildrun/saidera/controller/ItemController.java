@@ -5,11 +5,12 @@ import org.springframework.web.bind.annotation.*;
 import tech.buildrun.saidera.entity.Item;
 import tech.buildrun.saidera.service.ItemService;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/bills/{billId}/items")
+@RequestMapping("/bills/{billUniqueId}/items")
 public class ItemController {
 
     private final ItemService itemService;
@@ -20,15 +21,23 @@ public class ItemController {
 
     @PostMapping
     public ResponseEntity<ItemResponseDto> createItem(
-            @PathVariable Long billId,
+            @PathVariable String billUniqueId,
             @RequestBody CreateItemDto createItemDto) {
-        Item createdItem = itemService.createItem(billId, createItemDto);
+
+        Item createdItem = itemService.addItemToBill(
+                billUniqueId,
+                createItemDto.name(),
+                createItemDto.price(),
+                createItemDto.quantity(),
+                createItemDto.peopleIds()
+        );
+
         return ResponseEntity.status(201).body(ItemResponseDto.fromEntity(createdItem));
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemResponseDto>> getItemsByBill(@PathVariable Long billId) {
-        List<Item> items = itemService.getItemsByBill(billId);
+    public ResponseEntity<List<ItemResponseDto>> getItemsByBill(@PathVariable String billUniqueId) {
+        List<Item> items = itemService.getItemsByBill(billUniqueId);
         List<ItemResponseDto> response = items.stream()
                 .map(ItemResponseDto::fromEntity)
                 .collect(Collectors.toList());
@@ -36,8 +45,10 @@ public class ItemController {
     }
 
     @DeleteMapping("/{itemId}")
-    public ResponseEntity<Void> deleteItem(@PathVariable Long itemId) {
-        itemService.deleteItem(itemId);
+    public ResponseEntity<Void> deleteItem(
+            @PathVariable String billUniqueId,
+            @PathVariable Long itemId) {
+        itemService.deleteItem(billUniqueId, itemId);
         return ResponseEntity.noContent().build();
     }
 }

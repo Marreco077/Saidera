@@ -2,13 +2,11 @@ package tech.buildrun.saidera.controller;
 
 import tech.buildrun.saidera.entity.Item;
 
-import java.math.BigDecimal;
-
-public record ItemResponseDto (
-    Long id,
-    String name,
-    BigDecimal price,
-    int quantity
+public record ItemResponseDto(
+        Long id,
+        String name,
+        java.math.BigDecimal price,
+        Integer quantity
 ) {
     public static ItemResponseDto fromEntity(Item item) {
         return new ItemResponseDto(

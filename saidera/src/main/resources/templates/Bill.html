@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Saidera - Conta</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Ajuste o caminho do seu CSS real, se tiver -->
+    <link th:href="@{/css/bill.css}" rel="stylesheet">
+</head>
+<body>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Saidera - Conta</h1>
+        <span class="badge"
+              th:classappend="${bill.isActive} ? 'bg-success' : 'bg-danger'"
+              th:text="${bill.isActive} ? 'Ativa' : 'Fechada'">
+            Status
+        </span>
+    </div>
+
+    <!-- Informações da Conta -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h6>
+                Criada por:
+                <span th:text="${bill.creatorName}">Nome do Criador</span>
+            </h6>
+            <p class="text-muted mb-0">
+                UniqueId (URL):
+                <span th:text="${bill.uniqueId}">UUID</span>
+            </p>
+            <p class="text-muted mb-0">
+                ID Numérico:
+                <span th:text="${bill.id}">1</span>
+            </p>
+            <small class="text-muted">
+                Criada em:
+                <span th:text="${#temporals.format(bill.creationTime, 'dd/MM/yyyy HH:mm')}">Data</span>
+            </small>
+        </div>
+    </div>
+
+    <!-- Seção de Pessoas -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Pessoas na Conta</h5>
+            <div class="people-list mb-3" id="peopleContainer">
+                <!-- Lista inicial de pessoas (renderizada pelo Thymeleaf) -->
+                <div th:each="person : ${bill.people}"
+                     th:id="'person-wrapper-' + ${person.id}"
+                     class="d-flex align-items-center mb-2">
+
+                    <!-- Checkbox: marca pagamento -->
+                    <input type="checkbox"
+                           class="form-check-input me-2"
+                           th:id="'person-' + ${person.id}"
+                           th:checked="${person.hasPaid}"
+                           th:onclick="'togglePaymentStatus(' + ${person.id} + ')'"/>
+
+                    <!-- Nome da pessoa -->
+                    <label class="form-check-label flex-grow-1"
+                           th:for="'person-' + ${person.id}"
+                           th:text="${person.name}">
+                        Nome da Pessoa
+                    </label>
+
+                    <span class="me-3" th:text="'R$ ' + ${#numbers.formatDecimal(person.amountToPay, 1, 2)}">
+                            R$ 0,00
+                    </span>
+
+                    <!-- Botão Remover -->
+                    <button class="btn btn-danger btn-sm ms-2"
+                            th:onclick="'removePerson(' + ${person.id} + ')'">
+                        Remover
+                    </button>
+                </div>
+            </div>
+
+            <!-- Formulário para adicionar nova pessoa -->
+            <div class="input-group">
+                <input type="text" id="newPersonName" class="form-control" placeholder="Nome da pessoa">
+                <button class="btn btn-primary" onclick="addPerson()">Adicionar Pessoa</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção de Itens -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="mb-3">Adicionar Item</h5>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" id="itemName" class="form-control" placeholder="Nome do item">
+                </div>
+                <div class="col-md-3">
+                    <input type="number" id="itemPrice" class="form-control" placeholder="Preço">
+                </div>
+                <div class="col-md-3">
+                    <input type="number" id="itemQuantity" class="form-control" placeholder="Quantidade">
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-success w-100" onclick="addItem()">Confirmar</button>
+                </div>
+                <!-- Seleção de consumidores -->
+                <div class="col-md-12">
+                    <label class="form-label">Quem consumiu este item?</label>
+                    <div class="consumers-list">
+                        <div th:each="person : ${bill.people}" class="form-check">
+                            <input type="checkbox"
+                                   class="form-check-input consumer-checkbox"
+                                   th:value="${person.id}"
+                                   th:id="'consumer-' + ${person.id}">
+                            <label class="form-check-label"
+                                   th:for="'consumer-' + ${person.id}"
+                                   th:text="${person.name}">
+                                Nome da Pessoa
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Itens -->
+            <div class="mt-4">
+                <h6>Itens Adicionados</h6>
+                <div class="list-group">
+                    <div th:each="item : ${bill.items}" class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span th:text="${item.name}">Nome do Item</span>
+                            <div>
+                                <span th:text="${item.quantity + 'x'}">Qtd</span>
+                                <span th:text="${'R$ ' + #numbers.formatDecimal(item.price, 1, 2)}">Preço</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção de Totalização -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Total da Conta</h5>
+            <div id="totalContainer">
+                <!-- Valor calculado no Controller ou no back-end -->
+                <h3>R$
+                    <span th:text="${total != null ? #numbers.formatDecimal(total, 2, 2) : '0,00'}">
+                        0,00
+                    </span>
+                </h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    const billId = [[${bill.id}]];
+    const billUniqueId = [[${bill.uniqueId}]];
+
+    /**
+     * Adiciona uma nova pessoa à conta
+     */
+    async function addPerson() {
+        const input = document.getElementById('newPersonName');
+        const name = input.value.trim();
+        if (!name) return;
+
+        try {
+            const response = await fetch(`/api/people/bills/${billId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            });
+            if (response.ok) {
+                const createdPerson = await response.json();
+                addPersonToList(createdPerson);
+                input.value = ''; // limpa o campo
+            } else {
+                console.error('Erro ao adicionar pessoa:', response.status);
+            }
+        } catch (error) {
+            console.error('Erro ao adicionar pessoa:', error);
+        }
+    }
+
+    /**
+     * Insere dinamicamente a nova pessoa na lista (DOM)
+     */
+    function addPersonToList(person) {
+        const container = document.getElementById('peopleContainer');
+        const div = document.createElement('div');
+        div.classList.add('d-flex', 'align-items-center', 'mb-2');
+        div.id = `person-wrapper-${person.id}`;
+
+        // Monta o HTML
+        div.innerHTML = `
+            <input type="checkbox"
+                   class="form-check-input me-2"
+                   id="person-${person.id}"
+                   ${person.hasPaid ? 'checked' : ''}
+                   onclick="togglePaymentStatus(${person.id})" />
+            <label class="form-check-label flex-grow-1"
+                   for="person-${person.id}">
+                ${person.name}
+            </label>
+            <button class="btn btn-danger btn-sm ms-2"
+                    onclick="removePerson(${person.id})">
+                Remover
+            </button>
+        `;
+
+        container.appendChild(div);
+
+        // Adiciona também na lista de consumidores
+        const consumersList = document.querySelector('.consumers-list');
+        const consumerDiv = document.createElement('div');
+        consumerDiv.classList.add('form-check');
+        consumerDiv.innerHTML = `
+            <input type="checkbox"
+                   class="form-check-input consumer-checkbox"
+                   value="${person.id}"
+                   id="consumer-${person.id}">
+            <label class="form-check-label"
+                   for="consumer-${person.id}">
+                ${person.name}
+            </label>
+        `;
+        consumersList.appendChild(consumerDiv);
+    }
+
+    /**
+     * Toggla o status de pagamento (PATCH)
+     */
+    async function togglePaymentStatus(peopleId) {
+        try {
+            const response = await fetch(`/api/people/${peopleId}/payment`, {
+                method: 'PATCH'
+            });
+            if (!response.ok) {
+                console.error('Falha ao atualizar status de pagamento:', response.status);
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar status de pagamento:', error);
+        }
+    }
+
+    /**
+     * Remove a pessoa (DELETE)
+     */
+    async function removePerson(peopleId) {
+        const confirma = confirm("Tem certeza que deseja remover esta pessoa?");
+        if (!confirma) return;
+
+        try {
+            const response = await fetch(`/api/people/${peopleId}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                // Remove da lista de pessoas
+                const personDiv = document.getElementById(`person-wrapper-${peopleId}`);
+                if (personDiv) {
+                    personDiv.remove();
+                }
+                // Remove da lista de consumidores
+                const consumerCheckbox = document.getElementById(`consumer-${peopleId}`);
+                if (consumerCheckbox) {
+                    consumerCheckbox.closest('.form-check').remove();
+                }
+            } else {
+                console.error('Falha ao remover pessoa:', response.status);
+            }
+        } catch (error) {
+            console.error('Erro ao remover pessoa:', error);
+        }
+    }
+
+    /**
+     * Adiciona um novo item
+     */
+    async function addItem() {
+        const name = document.getElementById('itemName').value;
+        const price = document.getElementById('itemPrice').value;
+        const quantity = document.getElementById('itemQuantity').value;
+
+        if (!name || !price || !quantity) return;
+
+        // Pega todos os checkboxes marcados
+        const selectedConsumers = Array.from(document.querySelectorAll('.consumer-checkbox:checked'))
+            .map(checkbox => parseInt(checkbox.value));
+
+        try {
+            const response = await fetch(`/bills/${billUniqueId}/items`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: name,
+                    price: parseFloat(price),
+                    quantity: parseInt(quantity),
+                    peopleIds: selectedConsumers
+                })
+            });
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                console.error('Erro ao adicionar item:', response.status);
+            }
+        } catch (error) {
+            console.error('Erro ao adicionar item:', error);
+        }
+    }
+    /*]]>*/
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
