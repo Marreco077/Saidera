@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <title>Saidera - Conta</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-    <link th:href="@{/css/bill.css}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/bill.css}" />
 </head>
 <body>
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Saidera - Conta</h1>
+        <h1 class="text-primary fw-bold">
+            <i class="fa-solid fa-beer-mug me-2"></i>Saidera - Conta
+        </h1>
         <span class="badge" th:classappend="${bill.isActive} ? 'bg-success' : 'bg-danger'" th:text="${bill.isActive} ? 'Ativa' : 'Fechada'">Status</span>
     </div>
 
@@ -17,7 +20,6 @@
         <div class="card-body">
             <h6>Criada por: <span th:text="${bill.creatorName}">Nome do Criador</span></h6>
             <p class="text-muted mb-0">UniqueId (URL): <span th:text="${bill.uniqueId}">UUID</span></p>
-            <p class="text-muted mb-0">ID Numérico: <span th:text="${bill.id}">1</span></p>
             <small class="text-muted">Criada em: <span th:text="${#temporals.format(bill.creationTime, 'dd/MM/yyyy HH:mm')}">Data</span></small>
         </div>
     </div>
@@ -47,15 +49,19 @@
             <div class="row g-3">
                 <div class="col-md-4">
                     <input type="text" id="itemName" class="form-control" placeholder="Nome do item">
+                    <div class="invalid-feedback" id="itemNameError">O nome do item é obrigatório.</div>
                 </div>
                 <div class="col-md-3">
                     <input type="number" id="itemPrice" class="form-control" placeholder="Preço">
+                    <div class="invalid-feedback" id="itemPriceError">O preço deve ser um número maior que 0.</div>
                 </div>
                 <div class="col-md-3">
                     <input type="number" id="itemQuantity" class="form-control" placeholder="Quantidade">
+                    <div class="invalid-feedback" id="itemQuantityError">A quantidade deve ser maior que 0.</div>
                 </div>
+
                 <div class="col-md-2">
-                    <button class="btn btn-success w-100" onclick="addItem()">Confirmar</button>
+                    <button id="addItemButton" class="btn btn-primary w-100" onclick="addItem()">Confirmar</button>
                 </div>
                 <div class="col-md-12">
                     <label class="form-label">Quem consumiu este item?</label>
@@ -93,7 +99,6 @@
         </div>
     </div>
 
-
     <script th:inline="javascript">
         const billId = [[${bill.id}]];
         const billUniqueId = [[${bill.uniqueId}]];
@@ -130,7 +135,6 @@
                 })
                 .catch(error => console.error("Erro ao buscar total pendente:", error));
         }
-
 
         function updateTotalOnPage() {
             let total = 0;
@@ -237,7 +241,6 @@
             }
         }
 
-
         async function removePerson(peopleId) {
             const confirma = confirm("Tem certeza que deseja remover esta pessoa?");
             if (!confirma) return;
@@ -258,32 +261,90 @@
         }
 
         async function addItem() {
-            const name = document.getElementById('itemName').value;
-            const price = document.getElementById('itemPrice').value;
-            const quantity = document.getElementById('itemQuantity').value;
-            if (!name || !price || !quantity) return;
+            const itemNameInput = document.getElementById('itemName');
+            const itemPriceInput = document.getElementById('itemPrice');
+            const itemQuantityInput = document.getElementById('itemQuantity');
+            const addButton = document.getElementById('addItemButton');
+
+            const name = itemNameInput.value.trim();
+            const price = parseFloat(itemPriceInput.value);
+            const quantity = parseInt(itemQuantityInput.value);
+
+            let hasError = false;
+
+            // Resetando mensagens de erro
+            document.querySelectorAll('.form-control').forEach(input => input.classList.remove('is-invalid'));
+
+            if (!name) {
+                document.getElementById('itemNameError').textContent = "O nome do item é obrigatório.";
+                itemNameInput.classList.add('is-invalid');
+                hasError = true;
+            }
+            if (isNaN(price) || price <= 0) {
+                document.getElementById('itemPriceError').textContent = "O preço deve ser um número maior que 0.";
+                itemPriceInput.classList.add('is-invalid');
+                hasError = true;
+            }
+            if (isNaN(quantity) || quantity <= 0) {
+                document.getElementById('itemQuantityError').textContent = "A quantidade deve ser maior que 0.";
+                itemQuantityInput.classList.add('is-invalid');
+                hasError = true;
+            }
+
+            if (hasError) return;
+
             const selectedConsumers = Array.from(document.querySelectorAll('.consumer-checkbox:checked'))
                 .map(checkbox => parseInt(checkbox.value));
+
             try {
                 const response = await fetch(`/bills/${billUniqueId}/items`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         name: name,
-                        price: parseFloat(price),
-                        quantity: parseInt(quantity),
+                        price: price,
+                        quantity: quantity,
                         peopleIds: selectedConsumers
                     })
                 });
-                if (response.ok) {
-                    window.location.reload();
-                } else {
-                    console.error('Erro ao adicionar item:', response.status);
+
+                if (!response.ok) {
+                    const errorMessage = await response.text();
+                    console.error(`Erro ao adicionar item: ${response.status} - ${errorMessage}`);
+                    alert(`Erro ao adicionar item: ${errorMessage}`);
+                    return;
                 }
+
+                let responseData;
+                try {
+                    responseData = await response.json();
+                    console.log("Item adicionado:", responseData);
+                } catch (jsonError) {
+                    console.warn("A resposta não está em formato JSON", jsonError);
+                }
+
+                addButton.classList.remove('btn-primary');
+                addButton.classList.add('btn-success');
+                addButton.textContent = "Item adicionado! ✅";
+
+                itemNameInput.value = "";
+                itemPriceInput.value = "";
+                itemQuantityInput.value = "";
+
+                setTimeout(() => {
+                    addButton.classList.remove('btn-success');
+                    addButton.classList.add('btn-primary');
+                    addButton.textContent = "Adicionar Item";
+                }, 2000);
+
+                window.location.reload();
+
             } catch (error) {
-                console.error('Erro ao adicionar item:', error);
+                console.error("Erro inesperado ao adicionar item:", error);
+                alert("Erro ao conectar ao servidor! Verifique sua conexão e tente novamente.");
             }
         }
+
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
