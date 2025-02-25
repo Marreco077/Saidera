@@ -1,5 +1,5 @@
 # Etapa de build (usando imagem com Maven)
-FROM maven:3.8.6-openjdk-17-slim AS build
+FROM maven:3.8-openjdk-17-slim AS build
 
 WORKDIR /app
 
