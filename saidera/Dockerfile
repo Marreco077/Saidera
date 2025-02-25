@@ -3,10 +3,10 @@ FROM maven:3.8-openjdk-17-slim AS build
 
 WORKDIR /app
 
-# Copiar os arquivos do projeto para dentro do contêiner
-COPY . .
+# Copiar todos os arquivos do projeto para dentro do contêiner
+COPY . /app
 
-# Construir o projeto usando Maven
+# Construir o projeto com Maven
 RUN mvn clean package -DskipTests
 
 # Etapa final (runtime)
