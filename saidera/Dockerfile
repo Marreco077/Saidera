@@ -1,5 +1,5 @@
-# Etapa de build com OpenJDK 17
-FROM openjdk:17-jdk-slim AS build
+# Etapa de build (usando imagem com Maven)
+FROM maven:3.8.6-openjdk-17-slim AS build
 
 WORKDIR /app
 
@@ -7,9 +7,9 @@ WORKDIR /app
 COPY . .
 
 # Construir o projeto usando Maven
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
-# Etapa final (runtime) com OpenJDK 17
+# Etapa final (runtime)
 FROM openjdk:17-jdk-slim
 
 # Definir diretório de trabalho
