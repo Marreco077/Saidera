@@ -13,7 +13,7 @@ RUN mvn clean package -DskipTests
 FROM openjdk:17-jdk-slim
 
 # Definir diretório de trabalho
-WORKDIR /app
+WORKDIR /saidera
 
 # Copiar o JAR gerado na etapa de build
 COPY --from=build /app/target/*.jar app.jar
