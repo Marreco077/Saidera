@@ -1,6 +1,5 @@
-
-FROM openjdk:23-jdk-slim AS build
-
+# Etapa de build com OpenJDK 17
+FROM openjdk:17-jdk-slim AS build
 
 WORKDIR /app
 
@@ -10,8 +9,8 @@ COPY . .
 # Construir o projeto usando Maven
 RUN ./mvnw clean package -DskipTests
 
-# Etapa final (runtime)
-FROM openjdk:23-jdk-slim
+# Etapa final (runtime) com OpenJDK 17
+FROM openjdk:17-jdk-slim
 
 # Definir diretório de trabalho
 WORKDIR /app
